@@ -1,0 +1,49 @@
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: bookly_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bookly_db
+      MYSQL_USER: springuser
+      MYSQL_PASSWORD: 12345
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - bookly_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  app:
+    build: .
+    container_name: bookly_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bookly_db
+      SPRING_DATASOURCE_USERNAME: springuser
+      SPRING_DATASOURCE_PASSWORD: 12345
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_EXPIRATION: 900000
+      JWT_REFRESH_EXPIRATION: 604800000
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - bookly_network
+    restart: on-failure
+
+networks:
+  bookly_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
