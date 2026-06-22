@@ -36,7 +36,7 @@ public class AuthService {
                 .lastName(dto.getLastName())
                 .email(dto.getEmail())
                 .password(passwordEncoder.encode(dto.getPassword()))
-                .role(User.Role.USER)
+                .role(userRepository.count() == 0 ? User.Role.ADMIN : User.Role.USER)
                 .build();
         userRepository.save(user);
 
