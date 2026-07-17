@@ -146,7 +146,7 @@ The app auto-seeds the database on first run with:
 
 ## 📱 Flutter Client
 
-A companion **Flutter mobile app** is available at [`AbdelrhmanSamy1/bookly-app`](https://github.com/AbdelrhmanSamy1/bookly-app) — built with Riverpod, Dio, and go_router.
+A companion **Flutter mobile app** is available at [`AbdelrhmanSamy1/bookly`](https://github.com/AbdelrhmanSamy1/bookly) — built with Riverpod, Dio, and go_router.
 
 ---
 
