@@ -2,7 +2,7 @@ package com.example.bookly.Services;
 
 import com.example.bookly.entity.RefreshToken;
 import com.example.bookly.entity.User;
-import com.example.bookly.exception.ResourceNotFoundException;
+import com.example.bookly.exception.InvalidTokenException;
 import com.example.bookly.repository.RefreshTokenRepository;
 import com.example.bookly.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -21,11 +21,11 @@ public class RefreshTokenService {
     private final UserRepository userRepository;
 
     @Value("${jwt.refresh-expiration}")
-
     private Long refreshExpiration;
+
     public RefreshToken createRefreshToken(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                .orElseThrow(() -> new InvalidTokenException("User not found with email: " + email));
 
         refreshTokenRepository.deleteByUser(user);
         RefreshToken refreshToken = RefreshToken.builder()
@@ -34,21 +34,20 @@ public class RefreshTokenService {
                 .expiresAt(Instant.now().plusMillis(refreshExpiration))
                 .used(false)
                 .build();
-        return  refreshTokenRepository.save(refreshToken);
+        return refreshTokenRepository.save(refreshToken);
     }
 
     public RefreshToken rotateRefreshToken(String oldTokenValue) {
         RefreshToken oldToken = refreshTokenRepository.findByToken(oldTokenValue)
-                .orElseThrow(() -> new RuntimeException("Refresh token not found"));
+                .orElseThrow(() -> new InvalidTokenException("Refresh token not found — please login again"));
 
         if (oldToken.isUsed()) {
             refreshTokenRepository.deleteByUser(oldToken.getUser());
-            throw new RuntimeException("Refresh token reuse detected — please login again");
+            throw new InvalidTokenException("Refresh token already used — please login again");
         }
         if (oldToken.getExpiresAt().isBefore(Instant.now())) {
             refreshTokenRepository.delete(oldToken);
-            throw new RuntimeException("Refresh token expired — please login again");
-
+            throw new InvalidTokenException("Refresh token expired — please login again");
         }
 
         RefreshToken newToken = RefreshToken.builder()
@@ -58,14 +57,12 @@ public class RefreshTokenService {
                 .used(false)
                 .build();
 
-         refreshTokenRepository.save(newToken);
-
+        refreshTokenRepository.save(newToken);
         refreshTokenRepository.delete(oldToken);
         return newToken;
     }
-    public void  deleteByUser(User user) {
+
+    public void deleteByUser(User user) {
         refreshTokenRepository.deleteByUser(user);
     }
-
-
 }

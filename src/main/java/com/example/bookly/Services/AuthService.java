@@ -6,14 +6,13 @@ import com.example.bookly.dto.response.AuthResponseDto;
 import com.example.bookly.entity.RefreshToken;
 import com.example.bookly.entity.User;
 import com.example.bookly.repository.UserRepository;
-import com.example.bookly.security.JwtAuthFilter;
+import com.example.bookly.exception.DuplicateResourceException;
 import com.example.bookly.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +28,7 @@ public class AuthService {
 
     public AuthResponseDto register(RegisterRequestDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new UsernameNotFoundException("Email already in use: " + dto.getEmail());
+            throw new DuplicateResourceException("Email already in use: " + dto.getEmail());
         }
         User user = User.builder()
                 .firstName(dto.getFirstName())
