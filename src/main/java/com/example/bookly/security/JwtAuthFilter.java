@@ -1,9 +1,7 @@
 package com.example.bookly.security;
 
-import com.sun.net.httpserver.HttpServer;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -42,18 +40,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
-
-                // زود الـ 3 سطور دول مؤقتاً للـ debug
-                System.out.println("=== JWT DEBUG ===");
-                System.out.println("User: " + userDetails.getUsername());
-                System.out.println("Authorities: " + userDetails.getAuthorities());
-                System.out.println("=================");
-
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
-                                userDetails.getAuthorities()  // ← تأكد ده موجود
+                                userDetails.getAuthorities()
                         );
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));

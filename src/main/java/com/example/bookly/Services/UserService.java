@@ -54,7 +54,7 @@ public class UserService {
         return userMapper.toDto(userRepository.save(user));
     }
     public void delete(Long id){
-        if (userRepository.existsById(id)) {
+        if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("User", id);
         }
         userRepository.deleteById(id);
